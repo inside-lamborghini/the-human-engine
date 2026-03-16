@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inside Lamborghini: The Human Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* 提取自实拍图与品牌基因的色彩 */
+            --lambo-green: #8EBA2B; 
+            --engine-bronze: #C19B6C; 
+            --spring-red: #E83A30; 
+            --hud-blue: #00F3FF; 
+            --carbon-fiber: #1a1a1a;
+            --text-light: #f4f4f4;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Rajdhani', sans-serif;
+            background-color: #050505;
+            color: var(--text-light);
+            /* 响应式布局基础 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 顶部标题区 */
+       .header {
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+       .header h1 {
+            text-transform: uppercase;
+            font-size: clamp(2rem, 5vw, 3.5rem); /* 响应式字体大小 */
+            letter-spacing: 3px;
+            margin: 0 0 0.5rem 0;
+        }
+
+       .header h1 span { color: var(--lambo-green); }
+        
+       .subtitle {
+            color: #888;
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            letter-spacing: 2px;
+        }
+
+        /* 互动地图容器：关键响应式设置 */
+       .map-container {
+            width: 100%;
+            max-width: 1200px; /* 限制最大宽度 */
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        /* SVG 设置为 100% 宽度，高度自适应，确保热区坐标永远精准匹配底图 */
+        svg {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* 热区悬停动画 */
+       .hotspot { cursor: pointer; }
+        
+       .hotspot polygon,.hotspot rect {
+            fill: rgba(0, 0, 0, 0.3);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+            pointer-events: all; /* 确保热区形状可以接收点击事件 */
+        }
+
+       .hotspot text {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 22px;
+            font-weight: bold;
+            fill: rgba(255,255,255,0.8);
+            pointer-events: none; /* 防止文字遮挡点击事件 */
+            transition: all 0.3s ease;
+        }
+
+       .hotspot:hover polygon,.hotspot:hover rect {
+            fill: rgba(255, 255, 255, 0.15);
+            stroke-width: 4;
+            filter: drop-shadow(0 0 12px currentColor);
+        }
+
+       .hotspot:hover text {
+            fill: #fff;
+            font-size: 25px;
+        }
+
+        /* 响应式弹窗 (Modal) */
+       .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+       .modal-overlay.active { display: flex; opacity: 1; }
+
+       .modal-content {
+            background: rgba(20, 20, 20, 0.95);
+            clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+            border: 2px solid var(--lambo-green);
+            padding: 2.5rem 2rem;
+            width: 90%;
+            max-width: 500px; /* 适配手机与电脑 */
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-sizing: border-box;
+        }
+
+       .modal-overlay.active.modal-content { transform: scale(1); }
+
+       .close-btn {
+            position: absolute; top: 10px; right: 20px;
+            color: #888; font-size: 2.5rem; cursor: pointer; line-height: 1;
+        }
+       .close-btn:hover { color: #fff; }
+
+       .value-tag {
+            display: inline-block;
+            padding: 3px 12px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            clip-path: polygon(5px 0, 100% 0, calc(100% - 5px) 100%, 0 100%);
+        }
+
+       .modal-role { font-size: clamp(1.5rem, 4vw, 2rem); text-transform: uppercase; margin: 5px 0 15px 0; }
+       .modal-desc { color: #bbb; font-size: 1.05rem; line-height: 1.5; margin-bottom: 20px; }
+        
+       .benefit-box {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-left: 4px solid var(--lambo-green);
+            margin-bottom: 20px;
+        }
+
+       .vlog-btn {
+            display: block; width: 100%;
+            background: transparent; color: #fff;
+            border: 2px solid currentColor; padding: 12px;
+            font-family: 'Rajdhani', sans-serif; font-size: 1.2rem;
+            text-transform: uppercase; font-weight: bold; cursor: pointer;
+            transition: 0.3s;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+        }
+       .vlog-btn:hover { background: currentColor; color: #000; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Inside Lamborghini:<br><span>The Human Engine</span></h1>
+        <p class="subtitle">SELECT A COMPONENT TO REVEAL OUR TEAMS AND CULTURE</p>
+    </div>
+
+    <div class="map-container">
+        <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+            <image href="lamborghini_v12_cover.webp" width="1200" height="600" preserveAspectRatio="xMidYMid slice"/>
+
+            <g class="hotspot" stroke="var(--engine-bronze)" 
+               data-role="R&D / Manufacturing Eng." 
+               data-value="BRAVE" data-color="#C19B6C" 
+               data-desc="Design and build the mechanical heart of Lamborghini. We push technical boundaries while ensuring your peak physical performance through our 'Body' pillar: LamboFIT, ergonomic workspaces, and nutrition programs." 
+               data-btn="Watch R&D POV Vlog">
+                <polygon points="460,180 740,180 720,400 480,400" />
+                <text x="600" y="290" text-anchor="middle">V12 CORE</text>
+            </g>
+
+            <g class="hotspot" stroke="var(--hud-blue)" 
+               data-role="Marketing / IT Dept." 
+               data-value="AUTHENTIC" data-color="#00F3FF" 
+               data-desc="The digital nervous system. Tell authentic brand stories and drive our tech transformation. Empowered by our 'Purpose' pillar, Gen Z talent guides senior leadership through our Reverse Mentoring program." 
+               data-btn="Watch Digital Strategy Vlog">
+                <polygon points="150,50 400,50 420,300 200,300" />
+                <polygon points="800,50 1050,50 1000,300 780,300" />
+                <text x="280" y="180" text-anchor="middle">TELEMETRY</text>
+                <text x="920" y="180" text-anchor="middle">DATA HUB</text>
+            </g>
+
+            <g class="hotspot" stroke="var(--spring-red)" 
+               data-role="HR / Organization" 
+               data-value="UNEXPECTED" data-color="#E83A30" 
+               data-desc="Absorb the shocks and stabilize the ecosystem. We safeguard our people's 'Mind' through unexpected benefits like psychological caring hotlines, mindfulness sessions, and specialized Dad Coaching." 
+               data-btn="Watch HR Culture Vlog">
+                <polygon points="200,420 450,420 400,580 150,580" />
+                <polygon points="750,420 1000,420 1050,580 800,580" />
+                <text x="300" y="520" text-anchor="middle">SUSPENSION</text>
+                <text x="900" y="520" text-anchor="middle">SUPPORT</text>
+            </g>
+            
+            <g class="hotspot" stroke="var(--lambo-green)" 
+               data-role="Centro Stile / Composite" 
+               data-value="UNEXPECTED" data-color="#8EBA2B" 
+               data-desc="Shape the iconic Lamborghini DNA and advanced materials. Where visionary art meets science. Enjoy an inclusive environment designed to foster absolute creative freedom." 
+               data-btn="Watch Design POV Vlog">
+                <polygon points="460,400 740,400 680,550 520,550" />
+                <text x="600" y="480" text-anchor="middle">CARBON STRUCTURE</text>
+            </g>
+        </svg>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-content" id="modal-box">
+            <span class="close-btn" id="close-btn">&times;</span>
+            <div class="value-tag" id="modal-value">VALUE</div>
+            <h2 class="modal-role" id="modal-role">ROLE</h2>
+            <p class="modal-desc" id="modal-desc">Description</p>
+            <div class="benefit-box" id="benefit-box">
+                <div style="font-weight: bold; margin-bottom: 5px; font-size: 0.9rem;">FEELOSOPHY INTEGRATION:</div>
+                <div id="modal-benefit" style="color: #ddd;">Benefit details</div>
+            </div>
+            <button class="vlog-btn" id="modal-btn">Watch Vlog</button>
+        </div>
+    </div>
+
+    <script>
+        const hotspots = document.querySelectorAll('.hotspot');
+        const modal = document.getElementById('modal');
+        const modalBox = document.getElementById('modal-box');
+        
+        hotspots.forEach(spot => {
+            spot.addEventListener('click', () => {
+                const color = spot.getAttribute('data-color');
+                
+                // 填充部门名称
+                document.getElementById('modal-role').textContent = spot.getAttribute('data-role');
+                document.getElementById('modal-role').style.color = color;
+                
+                // 填充核心价值观标签 (Brave, Authentic, Unexpected)
+                const valueTag = document.getElementById('modal-value');
+                valueTag.textContent = spot.getAttribute('data-value');
+                valueTag.style.backgroundColor = color;
+                valueTag.style.color = color === '#00F3FF' ||color === '#8EBA2B'? '#000' : '#fff'; // 确保文字对比度
+                
+                // 填充描述与福利
+                document.getElementById('modal-benefit').textContent = spot.getAttribute('data-desc');
+                
+                // 按钮设置
+                const btn = document.getElementById('modal-btn');
+                btn.textContent = spot.getAttribute('data-btn');
+                btn.style.borderColor = color;
+                btn.style.color = color;
+                
+                // 边框主题色
+                modalBox.style.borderColor = color;
+                document.getElementById('benefit-box').style.borderLeftColor = color;
+
+                // 显示弹窗
+                modal.classList.add('active');
+            });
+        });
+
+        // 关闭弹窗事件
+        document.getElementById('close-btn').addEventListener('click', () => modal.classList.remove('active'));
+        window.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('active'); });
+    </script>
+</body>
+</html>
