@@ -4,96 +4,155 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inside Lamborghini: The Human Engine</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             /* 提取自实拍图与品牌基因的色彩 */
             --lambo-green: #8EBA2B; 
             --engine-bronze: #C19B6C; 
             --spring-red: #E83A30; 
-            --hud-blue: #00F3FF; 
-            --carbon-fiber: #1a1a1a;
+            --hud-cyan: #00F3FF; 
+            --hud-lime: #bcee66;
+            --carbon-fiber: #0a0a0a;
             --text-light: #f4f4f4;
         }
 
         body {
             margin: 0;
             font-family: 'Rajdhani', sans-serif;
-            background-color: #050505;
+            background-color: var(--carbon-fiber);
             color: var(--text-light);
-            /* 响应式布局基础 */
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
+            /* 纯 CSS 碳纤维编织纹理背景 */
+            background-image: 
+                linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), 
+                linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), 
+                linear-gradient(to bottom, #111, #1a1a1a);
+            background-size: 10px 10px, 10px 10px, 100% 100%;
+            background-position: 0px 0px, 5px 5px, 0px 0px;
         }
 
         /* 顶部标题区 */
        .header {
             text-align: center;
-            padding: 2rem 1rem 1rem;
+            padding: 2.5rem 1rem 0.5rem;
             width: 100%;
             box-sizing: border-box;
+            z-index: 10;
         }
 
        .header h1 {
             text-transform: uppercase;
-            font-size: clamp(2rem, 5vw, 3.5rem); /* 响应式字体大小 */
-            letter-spacing: 3px;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            letter-spacing: 4px;
             margin: 0 0 0.5rem 0;
+            line-height: 1.1;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
         }
 
        .header h1 span { color: var(--lambo-green); }
         
+       .campaign-slogan {
+            color: #fff;
+            font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+            font-weight: 600;
+            letter-spacing: 2px;
+            margin: 15px 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 8px rgba(0, 243, 255, 0.4);
+        }
+
        .subtitle {
             color: #888;
-            font-size: clamp(1rem, 2vw, 1.2rem);
+            font-size: clamp(0.85rem, 1.5vw, 1rem);
+            letter-spacing: 3px;
+            margin: 0;
+            text-transform: uppercase;
+        }
+
+        /* 移动端横向滑动提示 */
+       .swipe-hint {
+            display: none;
+            color: var(--lambo-green);
+            font-weight: 700;
+            text-transform: uppercase;
             letter-spacing: 2px;
+            margin-top: 15px;
+            animation: pulse 2s infinite;
         }
 
-        /* 互动地图容器：关键响应式设置 */
-       .map-container {
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+
+        /* 地图外层包装：彻底解决手机端过宽、下方留白的问题 */
+       .map-wrapper {
             width: 100%;
-            max-width: 1200px; /* 限制最大宽度 */
-            position: relative;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; 
             margin-top: 1rem;
+            padding-bottom: 2rem;
+        }
+       .map-wrapper::-webkit-scrollbar { display: none; }
+
+       .map-container {
+            /* 强制最小宽度，确保在手机上引擎够大，需要左右滑动探索 */
+            min-width: 1000px; 
+            max-width: 1200px; 
+            margin: 0 auto;
+            position: relative;
         }
 
-        /* SVG 设置为 100% 宽度，高度自适应，确保热区坐标永远精准匹配底图 */
         svg {
             width: 100%;
             height: auto;
             display: block;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
         }
 
-        /* 热区悬停动画 */
+        /* HUD 科技感热区样式复刻 */
        .hotspot { cursor: pointer; }
         
-       .hotspot polygon,.hotspot rect {
-            fill: rgba(0, 0, 0, 0.3);
-            stroke-width: 2;
+       .hotspot polygon {
+            fill: rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
-            pointer-events: all; /* 确保热区形状可以接收点击事件 */
+            pointer-events: all; /* 确保全区域可点击 */
+        }
+
+       .hotspot path {
+            fill: none;
+            stroke-width: 2.5;
+            transition: all 0.3s ease;
+            pointer-events: none;
         }
 
        .hotspot text {
             font-family: 'Rajdhani', sans-serif;
-            font-size: 22px;
-            font-weight: bold;
+            font-size: 18px;
+            font-weight: 700;
             fill: rgba(255,255,255,0.8);
-            pointer-events: none; /* 防止文字遮挡点击事件 */
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px rgba(0,0,0,0.9);
+            pointer-events: none;
             transition: all 0.3s ease;
         }
 
-       .hotspot:hover polygon,.hotspot:hover rect {
-            fill: rgba(255, 255, 255, 0.15);
-            stroke-width: 4;
-            filter: drop-shadow(0 0 12px currentColor);
+        /* 热区悬停：全息发光效果 */
+       .hotspot:hover polygon { fill: rgba(255, 255, 255, 0.15); }
+       .hotspot:hover path {
+            stroke-width: 5;
+            filter: drop-shadow(0 0 8px currentColor);
         }
-
        .hotspot:hover text {
             fill: #fff;
-            font-size: 25px;
+            font-size: 20px;
+            text-shadow: 0 0 10px currentColor;
         }
 
         /* 响应式弹窗 (Modal) */
@@ -113,12 +172,12 @@
        .modal-overlay.active { display: flex; opacity: 1; }
 
        .modal-content {
-            background: rgba(20, 20, 20, 0.95);
+            background: rgba(15, 15, 15, 0.95);
             clip-path: polygon(0 15px, 15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
             border: 2px solid var(--lambo-green);
             padding: 2.5rem 2rem;
             width: 90%;
-            max-width: 500px; /* 适配手机与电脑 */
+            max-width: 500px;
             position: relative;
             transform: scale(0.9);
             transition: transform 0.3s ease;
@@ -163,59 +222,93 @@
             clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
         }
        .vlog-btn:hover { background: currentColor; color: #000; }
+
+        @media (max-width: 900px) {
+           .swipe-hint { display: block; } /* 仅在手机端显示滑动提示 */
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
         <h1>Inside Lamborghini:<br><span>The Human Engine</span></h1>
+        <div class="campaign-slogan">"Behind Every Supercar there is a super mind"</div>
         <p class="subtitle">SELECT A COMPONENT TO REVEAL OUR TEAMS AND CULTURE</p>
+        <div class="swipe-hint">⟷ Swipe to explore engine ⟷</div>
     </div>
 
-    <div class="map-container">
-        <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
-            <image href="lamborghini_v12_cover.webp" width="1200" height="600" preserveAspectRatio="xMidYMid slice"/>
+    <div class="map-wrapper">
+        <div class="map-container">
+            <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+                <image href="lamborghini_v12_cover.webp" width="1200" height="600" preserveAspectRatio="xMidYMid slice"/>
 
-            <g class="hotspot" stroke="var(--engine-bronze)" 
-               data-role="R&D / Manufacturing Eng." 
-               data-value="BRAVE" data-color="#C19B6C" 
-               data-desc="Design and build the mechanical heart of Lamborghini. We push technical boundaries while ensuring your peak physical performance through our 'Body' pillar: LamboFIT, ergonomic workspaces, and nutrition programs." 
-               data-btn="Watch R&D POV Vlog">
-                <polygon points="460,180 740,180 720,400 480,400" />
-                <text x="600" y="290" text-anchor="middle">V12 CORE</text>
-            </g>
+                <g class="hotspot" data-role="IT Department" data-value="AUTHENTIC" data-color="#00F3FF" 
+                   data-desc="Build the digital nervous system. Supported by continuous technical training, ergonomic setups, and our WeLambo digital community, you drive our tech transformation." 
+                   data-btn="Watch IT Dept POV Vlog">
+                    <polygon points="100,80 380,80 380,300 100,300" />
+                    <path stroke="var(--hud-cyan)" d="M 130 80 H 100 V 110" />
+                    <path stroke="var(--hud-cyan)" d="M 100 270 V 300 H 130" />
+                    <path stroke="var(--hud-cyan)" d="M 350 80 H 380 V 110" />
+                    <path stroke="var(--hud-cyan)" d="M 380 270 V 300 H 350" />
+                    <text x="240" y="195" text-anchor="middle">TELEMETRY</text>
+                </g>
 
-            <g class="hotspot" stroke="var(--hud-blue)" 
-               data-role="Marketing / IT Dept." 
-               data-value="AUTHENTIC" data-color="#00F3FF" 
-               data-desc="The digital nervous system. Tell authentic brand stories and drive our tech transformation. Empowered by our 'Purpose' pillar, Gen Z talent guides senior leadership through our Reverse Mentoring program." 
-               data-btn="Watch Digital Strategy Vlog">
-                <polygon points="150,50 400,50 420,300 200,300" />
-                <polygon points="800,50 1050,50 1000,300 780,300" />
-                <text x="280" y="180" text-anchor="middle">TELEMETRY</text>
-                <text x="920" y="180" text-anchor="middle">DATA HUB</text>
-            </g>
+                <g class="hotspot" data-role="Marketing & Communication" data-value="UNEXPECTED" data-color="#bcee66" 
+                   data-desc="Tell authentic brand stories globally. Empowered by Reverse Mentoring, enabling Gen Z to lead our digital transformation and guide senior leadership." 
+                   data-btn="Watch Marketing POV Vlog">
+                    <polygon points="820,80 1100,80 1100,300 820,300" />
+                    <path stroke="var(--hud-lime)" d="M 850 80 H 820 V 110" />
+                    <path stroke="var(--hud-lime)" d="M 820 270 V 300 H 850" />
+                    <path stroke="var(--hud-lime)" d="M 1070 80 H 1100 V 110" />
+                    <path stroke="var(--hud-lime)" d="M 1100 270 V 300 H 1070" />
+                    <text x="960" y="195" text-anchor="middle">DATA HUB</text>
+                </g>
 
-            <g class="hotspot" stroke="var(--spring-red)" 
-               data-role="HR / Organization" 
-               data-value="UNEXPECTED" data-color="#E83A30" 
-               data-desc="Absorb the shocks and stabilize the ecosystem. We safeguard our people's 'Mind' through unexpected benefits like psychological caring hotlines, mindfulness sessions, and specialized Dad Coaching." 
-               data-btn="Watch HR Culture Vlog">
-                <polygon points="200,420 450,420 400,580 150,580" />
-                <polygon points="750,420 1000,420 1050,580 800,580" />
-                <text x="300" y="520" text-anchor="middle">SUSPENSION</text>
-                <text x="900" y="520" text-anchor="middle">SUPPORT</text>
-            </g>
-            
-            <g class="hotspot" stroke="var(--lambo-green)" 
-               data-role="Centro Stile / Composite" 
-               data-value="UNEXPECTED" data-color="#8EBA2B" 
-               data-desc="Shape the iconic Lamborghini DNA and advanced materials. Where visionary art meets science. Enjoy an inclusive environment designed to foster absolute creative freedom." 
-               data-btn="Watch Design POV Vlog">
-                <polygon points="460,400 740,400 680,550 520,550" />
-                <text x="600" y="480" text-anchor="middle">CARBON STRUCTURE</text>
-            </g>
-        </svg>
+                <g class="hotspot" data-role="Research & Development / Mfg Eng." data-value="BRAVE" data-color="#C19B6C" 
+                   data-desc="Design the mechanical heart of Lamborghini. Keep your engine running at peak performance with LamboFIT and the 'I am feeling food!' nutrition program." 
+                   data-btn="Watch R&D POV Vlog">
+                    <polygon points="450,140 750,140 750,400 450,400" />
+                    <path stroke="var(--engine-bronze)" d="M 480 140 H 450 V 170" />
+                    <path stroke="var(--engine-bronze)" d="M 450 370 V 400 H 480" />
+                    <path stroke="var(--engine-bronze)" d="M 720 140 H 750 V 170" />
+                    <path stroke="var(--engine-bronze)" d="M 750 370 V 400 H 720" />
+                    <text x="600" y="275" text-anchor="middle">V12 CORE</text>
+                </g>
+
+                <g class="hotspot" data-role="Centro Stile / Composite Center" data-value="UNEXPECTED" data-color="#8EBA2B" 
+                   data-desc="Shape the iconic Lamborghini DNA. Enjoy an inclusive environment designed to foster absolute creative freedom and continuous inspiration." 
+                   data-btn="Watch Designer POV Vlog">
+                    <polygon points="420,420 780,420 720,560 480,560" />
+                    <path stroke="var(--lambo-green)" d="M 450 420 L 420 420 L 428 450" />
+                    <path stroke="var(--lambo-green)" d="M 750 420 L 780 420 L 772 450" />
+                    <path stroke="var(--lambo-green)" d="M 471 530 L 480 560 L 510 560" />
+                    <path stroke="var(--lambo-green)" d="M 729 530 L 720 560 L 690 560" />
+                    <text x="600" y="495" text-anchor="middle">CARBON STRUCTURE</text>
+                </g>
+
+                <g class="hotspot" data-role="Human Resources & Organization" data-value="AUTHENTIC" data-color="#E83A30" 
+                   data-desc="Provide the stability that keeps the ecosystem grounded. Recharge with our psychological caring hotline, mindfulness sessions, and exclusive sleep coach programs." 
+                   data-btn="Watch HR POV Vlog">
+                    <polygon points="150,420 400,420 400,580 80,580" />
+                    <path stroke="var(--spring-red)" d="M 180 420 L 150 420 L 137 450" />
+                    <path stroke="var(--spring-red)" d="M 93 550 L 80 580 L 110 580" />
+                    <path stroke="var(--spring-red)" d="M 370 420 L 400 420 L 400 450" />
+                    <path stroke="var(--spring-red)" d="M 400 550 L 400 580 L 370 580" />
+                    <text x="250" y="505" text-anchor="middle">SUSPENSION</text>
+                </g>
+
+                <g class="hotspot" data-role="Quality & Logistics" data-value="BRAVE" data-color="#E83A30" 
+                   data-desc="Keep the Lamborghini machine running smoothly. Benefit from pioneering Dad Coaching, flexible working arrangements, and comprehensive family support." 
+                   data-btn="Watch Operations POV Vlog">
+                    <polygon points="800,420 1050,420 1120,580 800,580" />
+                    <path stroke="var(--spring-red)" d="M 1020 420 L 1050 420 L 1063 450" />
+                    <path stroke="var(--spring-red)" d="M 1107 550 L 1120 580 L 1090 580" />
+                    <path stroke="var(--spring-red)" d="M 830 420 L 800 420 L 800 450" />
+                    <path stroke="var(--spring-red)" d="M 800 550 L 800 580 L 830 580" />
+                    <text x="950" y="505" text-anchor="middle">SUPPORT</text>
+                </g>
+            </svg>
+        </div>
     </div>
 
     <div class="modal-overlay" id="modal">
@@ -241,35 +334,28 @@
             spot.addEventListener('click', () => {
                 const color = spot.getAttribute('data-color');
                 
-                // 填充部门名称
                 document.getElementById('modal-role').textContent = spot.getAttribute('data-role');
                 document.getElementById('modal-role').style.color = color;
                 
-                // 填充核心价值观标签 (Brave, Authentic, Unexpected)
                 const valueTag = document.getElementById('modal-value');
                 valueTag.textContent = spot.getAttribute('data-value');
                 valueTag.style.backgroundColor = color;
-                valueTag.style.color = color === '#00F3FF' ||color === '#8EBA2B'? '#000' : '#fff'; // 确保文字对比度
+                valueTag.style.color = (color === '#00F3FF' || color === '#8EBA2B' || color === '#bcee66')? '#000' : '#fff'; 
                 
-                // 填充描述与福利
                 document.getElementById('modal-benefit').textContent = spot.getAttribute('data-desc');
                 
-                // 按钮设置
                 const btn = document.getElementById('modal-btn');
                 btn.textContent = spot.getAttribute('data-btn');
                 btn.style.borderColor = color;
                 btn.style.color = color;
                 
-                // 边框主题色
                 modalBox.style.borderColor = color;
                 document.getElementById('benefit-box').style.borderLeftColor = color;
 
-                // 显示弹窗
                 modal.classList.add('active');
             });
         });
 
-        // 关闭弹窗事件
         document.getElementById('close-btn').addEventListener('click', () => modal.classList.remove('active'));
         window.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('active'); });
     </script>
